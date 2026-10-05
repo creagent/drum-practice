@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f2eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ритмика">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<script data-theme-init>try{document.documentElement.dataset.theme=localStorage.getItem('rhythm-practice-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch{document.documentElement.dataset.theme='light';}</script>
+<title>Ритмика — этюды и акценты</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light;--page:#f5f2eb;--text:#242821;--muted:#697064;--line:#dedfd5;--panel:#eaece3;--panel-line:#d9ddcf;--surface:#fffdf8;--choice:#f6f7f0;--input:#fafbf6;--input-line:#b8bfb1;--green:#354d3f;--on-green:#fff;--hover:#e8ece3;--green-hover:#233d2e;--foot:#f8f7f0;--badge:#f1e5bf;--badge-text:#6e572b;--focus:#b98120;--error:#9a3427;--highlight:#ad6500;--bar-highlight:#f4ecd2}
+:root[data-theme=dark]{color-scheme:dark;--page:#161b18;--text:#edf0e9;--muted:#b0b9ad;--line:#374139;--panel:#222b25;--panel-line:#3a463c;--surface:#1c241f;--choice:#2b352d;--input:#17211b;--input-line:#607164;--green:#b5d2a9;--on-green:#1a2a1d;--hover:#344238;--green-hover:#c6e1bb;--foot:#222d26;--badge:#423b25;--badge-text:#ead39b;--focus:#e9bc69;--error:#ffb4a8;--highlight:#ffd179;--bar-highlight:#514832}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--page);color:var(--text)}main{max-width:1320px;margin:auto;padding:28px 32px 40px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}h1{font-size:30px;letter-spacing:-.8px;margin:0;font-weight:750}h2{font-size:17px;letter-spacing:-.3px;margin:0}.eyebrow{font-size:11px;letter-spacing:1.7px;text-transform:uppercase;font-weight:700;color:var(--green)}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:inherit;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;min-height:44px}button:hover{background:var(--hover)}button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible,summary:focus-visible,.score-line:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.primary,.play-button{background:var(--green);border-color:var(--green);color:var(--on-green)}.primary{min-width:210px;min-height:48px}.primary:hover,.play-button:hover{background:var(--green-hover)}.play-button{min-width:115px}
+.tabs{display:flex;gap:6px;padding:5px;width:max-content;max-width:100%;margin-bottom:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.tabs button{min-width:125px;background:transparent;border-color:transparent}.tabs button[aria-selected=true]{background:var(--surface);border-color:var(--line);box-shadow:0 2px 5px #0000000a}.tabs button[aria-selected=false]{color:var(--muted)}
+.controls{display:grid;grid-template-columns:160px minmax(0,1fr);gap:25px;align-items:center;padding:24px;background:var(--panel);border:1px solid var(--panel-line);border-radius:15px;margin-bottom:25px}.accent-controls{grid-template-columns:repeat(4,minmax(0,1fr));align-items:start}.accent-controls .generate-area{grid-column:1/-1}.accent-controls small{max-width:32ch}label{font-size:13px;font-weight:650;display:block;margin-bottom:8px}small{display:block;font-size:12px;line-height:1.5;color:var(--muted);margin-top:7px}input[type=number]{width:100%;height:45px;border:1px solid var(--input-line);border-radius:7px;background:var(--input);padding:8px 12px;font:inherit;color:inherit}input[type=checkbox]{accent-color:var(--green);width:17px;height:17px;margin:0;flex-shrink:0}input[type=range]{accent-color:var(--green)}fieldset{margin:0;border:0;padding:0;min-width:0}.palette>legend{font-size:13px;font-weight:650;margin-bottom:12px}.duration-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}.duration-choice{background:var(--choice);border:1px solid var(--panel-line);border-radius:8px;padding:12px 10px}.duration-name{font-size:12px;font-weight:650;margin:0 0 10px;white-space:nowrap}.choice{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;min-height:30px;margin:0;cursor:pointer}.generate-area{display:flex;align-items:center;gap:18px}.generate-area small{margin:0}.error{grid-column:1/-1;color:var(--error);font-size:13px;margin:0}
+.generation-settings{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:20px 28px}.rest-control{flex:1 1 250px;min-width:0}.rest-label{display:flex;align-items:center;justify-content:space-between;gap:12px}.rest-label label{margin:0}.rest-label output{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;color:var(--green)}.rest-control input{display:block;width:100%;margin:9px 0 0}.generation-settings .generate-area{flex:2 1 320px;min-width:0}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:15px;overflow:hidden;min-width:0}.sheet-header{padding:22px 26px 18px;display:flex;gap:15px;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheet-title{font-family:Georgia,serif;font-weight:400;font-size:27px;margin:5px 0 8px}.meta{font-size:12px;color:var(--muted);line-height:1.5}.badge{font-family:Georgia,serif;font-size:23px;background:var(--badge);color:var(--badge-text);padding:8px 12px;border-radius:6px;white-space:nowrap}.score{padding:18px 24px 14px}.score-line{margin:4px 0 16px;overflow-x:auto}.score-line svg{display:block;width:100%;height:auto;color:var(--text)}.score-line.dense svg{min-width:var(--dense-width)}.sheet-footer{padding:14px 26px;background:var(--foot);border-top:1px solid var(--line);display:flex;gap:22px;font-size:12px;color:var(--muted);align-items:center;flex-wrap:wrap}.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}.status{font-size:12px;color:var(--muted);min-height:18px;margin:12px 0 0}.help{font-size:13px;line-height:1.65;margin-top:22px;color:var(--muted)}summary{cursor:pointer;color:var(--text);font-weight:600}details p{max-width:760px;margin:12px 0}footer{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:15px;border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.accent-text{white-space:pre-wrap;overflow-wrap:anywhere;font:600 18px/1.8 system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--text)}.pagination{display:flex;justify-content:center;align-items:center;gap:14px;padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.player{display:flex;align-items:center;gap:16px 22px;flex-wrap:wrap;padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:18px}.transport{display:flex;gap:8px}.tempo-control{display:flex;align-items:center;gap:9px}.tempo-control label{margin:0}.tempo-control input{width:76px;height:42px}.tempo-control span{font-size:11px;color:var(--muted)}.volume-control{display:flex;align-items:center;gap:8px;font-size:12px;margin:0;font-weight:500}.volume-control input{width:85px}.player-status{width:100%;font-size:12px;color:var(--muted);margin:0}.position{font-size:12px;font-variant-numeric:tabular-nums;color:var(--green)}.playback-bar{fill:var(--bar-highlight)}.active-measure>.playback-bar{opacity:1}.active-event{color:var(--highlight);fill:currentColor}
+@media(max-width:1100px){.controls{grid-template-columns:140px minmax(0,1fr);gap:20px}.accent-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){main{padding:20px 16px 30px}h1{font-size:26px}header{margin-bottom:18px}.tabs{width:100%}.tabs button{flex:1;min-width:0}.controls{grid-template-columns:1fr;padding:18px;gap:18px}.field{display:grid;grid-template-columns:1fr 95px;align-items:center;gap:5px 12px}.field label{margin:0}.field small{grid-column:1/-1;margin:0;max-width:none}.duration-options{grid-template-columns:repeat(3,minmax(0,1fr))}.generate-area{display:block}.primary{width:100%}.generate-area small{margin-top:9px}.sheet-header{padding:18px}.score{padding:12px 12px 5px}.sheet-footer{padding:12px 18px;gap:7px 16px}.sheet-title{font-size:24px}}
+@media(max-width:400px){.duration-options{gap:8px}.duration-choice{padding:10px 7px}.duration-name{font-size:11px}.choice{font-size:12px;gap:5px}}
+@media print{@page{size:A4;margin:12mm}:root{--text:#242821;--muted:#697064;--surface:#fff;--foot:#fff;--line:#dedfd5;--green:#354d3f;--badge:#f1e5bf;--badge-text:#6e572b}body{background:white;color:#242821}main{padding:0;max-width:none}header,.tabs,.controls,.player,.actions,.status,.help,footer,.pagination{display:none}.sheet{border:0;border-radius:0}.sheet-header{padding:0 0 15px}.score{padding:10px 0}.score-line{break-inside:avoid;overflow:visible;margin:5px 0 14px}.score-line svg{width:100%;min-width:0!important}.playback-bar{opacity:0!important}.active-event{color:#242821}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>Ритмика</h1><button id="theme-toggle" type="button">Тёмная тема</button></header>
+<div class="tabs" role="tablist" aria-label="Упражнение"><button id="tab-etudes" type="button" role="tab" aria-selected="true" aria-controls="panel-etudes" tabindex="0">Этюды</button><button id="tab-accents" type="button" role="tab" aria-selected="false" aria-controls="panel-accents" tabindex="-1">Акценты</button></div>
+<section id="panel-etudes" role="tabpanel" aria-labelledby="tab-etudes">
+<form id="generator" class="controls">
+<div class="field"><label for="bars">Количество тактов</label><input id="bars" type="number" min="1" max="64" step="1" value="8" required inputmode="numeric"><small>От 1 до 64 · размер 4/4</small></div>
+<fieldset class="palette" aria-describedby="selection-hint"><legend>Что использовать в этюде</legend><div class="duration-options">
+<div class="duration-choice"><p class="duration-name">Восьмые</p><label class="choice"><input type="checkbox" name="notes" value="eighth" checked aria-label="Восьмые ноты">Ноты</label><label class="choice"><input type="checkbox" name="rests" value="eighth" checked aria-label="Восьмые паузы">Паузы</label><label class="choice"><input id="dotted-eighth" type="checkbox" aria-label="Восьмые с точкой">С точкой</label></div>
+<div class="duration-choice"><p class="duration-name">Триоли</p><label class="choice"><input type="checkbox" name="notes" value="triplet" checked aria-label="Триольные ноты">Ноты</label><label class="choice"><input type="checkbox" name="rests" value="triplet" checked aria-label="Триольные паузы">Паузы</label></div>
+<div class="duration-choice"><p class="duration-name">Шестнадцатые</p><label class="choice"><input type="checkbox" name="notes" value="sixteenth" checked aria-label="Шестнадцатые ноты">Ноты</label><label class="choice"><input type="checkbox" name="rests" value="sixteenth" checked aria-label="Шестнадцатые паузы">Паузы</label></div>
+<div class="duration-choice"><p class="duration-name">Квинтоли</p><label class="choice"><input type="checkbox" name="notes" value="quintuplet" checked aria-label="Квинтольные ноты">Ноты</label><label class="choice"><input type="checkbox" name="rests" value="quintuplet" checked aria-label="Квинтольные паузы">Паузы</label></div>
+<div class="duration-choice"><p class="duration-name">Секстоли</p><label class="choice"><input type="checkbox" name="notes" value="sextuplet" checked aria-label="Секстольные ноты">Ноты</label><label class="choice"><input type="checkbox" name="rests" value="sextuplet" checked aria-label="Секстольные паузы">Паузы</label></div>
+</div></fieldset>
+<div class="generation-settings">
+<div class="rest-control"><div class="rest-label"><label for="rest-chance">Количество пауз</label><output id="rest-value" for="rest-chance">30%</output></div><input id="rest-chance" type="range" min="0" max="100" step="5" value="30" aria-valuemax="99" aria-valuenow="30" aria-valuetext="30%" aria-describedby="rest-hint"><small id="rest-hint">Для всех выбранных пауз · шаг 5%, максимум 99%</small></div>
+<div class="generate-area"><button class="primary" type="submit">Сгенерировать этюд ↗</button><small id="selection-hint">Галочки задают исходный ритм. При объединении могут появиться более длинные ноты и паузы.</small></div>
+</div>
+<p class="error" id="error" role="alert" hidden></p>
+</form>
+</section>
+<section id="panel-accents" role="tabpanel" aria-labelledby="tab-accents" hidden>
+<form id="accent-generator" class="controls accent-controls">
+<div class="field"><label for="accent-beats">Долей в такте</label><input id="accent-beats" type="number" min="1" max="64" step="1" value="4" required inputmode="numeric"><small>Одна доля — четверть</small></div>
+<div class="field"><label for="accent-notes">Нот в доле</label><input id="accent-notes" type="number" min="1" max="64" step="1" value="3" required inputmode="numeric"><small>Например: 2 — восьмые, 3 — триоли</small></div>
+<div class="field"><label for="accent-max">Максимум акцентов в доле</label><input id="accent-max" type="number" min="1" max="3" step="1" value="1" required inputmode="numeric"><small>От одного до выбранного максимума</small></div>
+<div class="field"><label for="accent-bars">Количество тактов</label><input id="accent-bars" type="number" min="1" max="256" step="1" value="4" required inputmode="numeric"><small>От 1 до 256</small></div>
+<div class="generate-area"><button class="primary" type="submit">Сгенерировать акценты ↗</button><small>Нота — акцент. Пауза — позиция без акцента.</small></div>
+<p class="error" id="accent-error" role="alert" hidden></p>
+</form>
+</section>
+<section aria-label="Результат упражнения">
+<div class="player" role="group" aria-label="Воспроизведение упражнения">
+<div class="transport"><button class="play-button" id="play" type="button">▶ Слушать</button><button id="stop" type="button" disabled>■ Стоп</button></div>
+<div class="tempo-control"><label for="tempo">Темп</label><input id="tempo" type="number" min="40" max="240" step="1" value="80" required inputmode="numeric"><span>BPM<br>четверть / мин</span></div>
+<label class="choice"><input id="metronome" type="checkbox" checked>Метроном</label>
+<label class="volume-control" for="volume">Громкость<input id="volume" type="range" min="0" max="100" value="60"></label>
+<span class="position" id="position" aria-live="off"></span>
+<p class="player-status" id="player-status" role="status">Короткие барабанные удары; метроном отмечает четверти.</p>
+</div>
+<div class="sheet"><div class="sheet-header"><div><div class="eyebrow" id="score-eyebrow">Практика чтения</div><h2 class="sheet-title" id="score-title">Ритмический этюд</h2><div class="meta" id="meta"></div></div><span class="badge" id="meter">4/4</span></div><div class="score"><div id="score-lines"></div></div><div class="pagination" id="pagination" hidden><button id="previous-page" type="button">← Назад</button><span id="page-label"></span><button id="next-page" type="button">Далее →</button></div><div class="sheet-footer" id="score-footer"><span>Один такт = четыре четверти</span><span>Точки — только у восьмых</span><span>Скобки с 3, 5 и 6 — группы на одну долю</span></div></div>
+<div class="actions"><button id="save-pdf" type="button">Скачать PDF</button><button id="save" type="button">Скачать ноты · SVG</button></div>
+<p class="status" id="status" role="status"></p>
+<details class="help" id="etude-help"><summary>Как устроен этюд</summary>
+<p>Размер всегда 4/4. Для исходного ритма можно выбрать восьмые, триоли, шестнадцатые, квинтоли и секстоли. Ноты и паузы включаются отдельно. Общий ползунок задаёт вероятность паузы в каждой позиции, в том числе внутри групп. При 0% пауз нет. По умолчанию паузы разрешены для всех пяти вариантов.</p>
+<p>Триоль, квинтоль и секстоль занимают одну четвертную долю и состоят из 3, 5 и 6 равных позиций. Каждая позиция может быть нотой или паузой — вся группа не обязана состоять из ударов. Полностью звучащая группа тоже может случайно получиться. Если выключить паузы для длительности, останутся только ноты.</p>
+<p>После генерации соседние паузы объединяются, а нота может поглотить следующую за ней паузу. Например, шестнадцатая нота и шестнадцатая пауза превращаются в восьмую. Для упрощения доступны половинные, четвертные, восьмые и шестнадцатые независимо от галочек. Два отдельных удара не объединяются; моменты звучания сохраняются. Объединение не пересекает тактовые черты и группы триолей, квинтолей и секстолей.</p>
+<p>Галочка «С точкой» разрешает только восьмые с точкой — при генерации и объединении. Такие восьмые занимают три четверти доли. У других длительностей точек нет. Из-за случайного выбора и объединения знаков итоговая доля пауз может отличаться от значения ползунка.</p>
+<p>«Слушать» проигрывает короткие барабанные удары в выбранном темпе. Паузы молчат; метроном отмечает четверти. «Стоп» завершает воспроизведение. «Скачать PDF» сохраняет этюд на страницах A4, а SVG — одним векторным файлом. На телефоне в строке один такт. На широком экране — четыре, если они помещаются, иначе два.</p>
+</details>
+<details class="help" id="accent-sequence" hidden><summary>Позиции акцентов цифрами</summary><p>Дефисы разделяют доли. Например, [13-2-2-23] — первая и третья позиции в первой доле, вторая во второй и третьей, вторая и третья в четвёртой.</p><pre id="accent-text" class="accent-text"></pre><button id="copy-accents" type="button">Скопировать позиции</button></details>
+<details class="help" id="accent-help" hidden><summary>Как устроены акценты</summary><p>В каждой доле случайно выбирается от одного до заданного максимума акцентов. Акцент записывается нотой, позиция без акцента — паузой. «Слушать» играет только акценты; метроном отмечает четверти.</p><p>Все позиции сохраняются без объединения, чтобы было видно расположение акцентов внутри доли. Скобки с числом обозначают равные деления доли, например триоли и квинтоли. На телефоне в строке один такт. Очень плотные такты можно прокрутить по горизонтали; большие упражнения показываются частями.</p><p>PDF и SVG содержат всё упражнение, независимо от открытой части. Цифровую последовательность можно раскрыть и скопировать.</p></details>
+</section>
+<footer><span>Практика на пэде · без регистрации</span><span id="offline-status">Всё создаётся в твоём браузере</span></footer>
+</main>
+<script>
+'use strict';
+// 120 ticks per quarter represent dotted notes and 3-, 5-, 6-tuplets exactly.
+const QUARTER_TICKS = 120;
+const BAR_TICKS = QUARTER_TICKS * 4;
+const DURATIONS = [
+  {id:'half', ticks:QUARTER_TICKS*2, beams:0, name:'половинная'},
+  {id:'quarter', ticks:QUARTER_TICKS, beams:0, name:'четвертная'},
+  {id:'eighth', ticks:QUARTER_TICKS/2, beams:1, name:'восьмая'},
+  {id:'triplet', ticks:QUARTER_TICKS/3, beams:1, tupletCount:3, name:'восьмая триоль'},
+  {id:'sixteenth', ticks:QUARTER_TICKS/4, beams:2, name:'шестнадцатая'},
+  {id:'quintuplet', ticks:QUARTER_TICKS/5, beams:2, tupletCount:5, name:'квинтольная'},
+  {id:'sextuplet', ticks:QUARTER_TICKS/6, beams:2, tupletCount:6, name:'секстольная'}
+];
+const GENERATION_DURATIONS = DURATIONS.filter(d => d.id !== 'half' && d.id !== 'quarter');
+function durationVariants(duration, dottedEighth = false) {
+  const plain={...duration,dotted:false};
+  return duration.id === 'eighth' && dottedEighth ? [plain,{...duration,ticks:duration.ticks*1.5,dotted:true}] : [plain];
+}
+function makeEtude(bars, selection, restChance = 0.3, random = Math.random, simplify = true) {
+  if (!Number.isInteger(bars) || bars < 1 || bars > 64) throw new RangeError('Количество тактов должно быть от 1 до 64.');
+  if (!Number.isFinite(restChance) || restChance < 0 || restChance > 0.99) throw new RangeError('Количество пауз должно быть от 0 до 99%.');
+  const families = GENERATION_DURATIONS.filter(d => selection[d.id]?.notes || (restChance > 0 && selection[d.id]?.rests));
+  if (!families.length && restChance === 0 && GENERATION_DURATIONS.some(d=>selection[d.id]?.rests)) throw new RangeError('Для этюда без пауз отметь хотя бы одну длительность ноты.');
+  if (!families.length) throw new RangeError('Отметь хотя бы одну длительность ноты или паузы.');
+  const choices=families.flatMap((d,i)=>durationVariants(d,Boolean(selection.eighth?.dotted)).map(v=>({...v,family:i})));
+  const minimumTypes = Math.min(2, families.length);
+  const maskSize = 2 ** families.length;
+  const memo = new Map();
+  const blockLength = d => d.tupletCount ? QUARTER_TICKS : d.ticks;
+  const fits = (d, time) => time + blockLength(d) <= BAR_TICKS && (!d.tupletCount || time % QUARTER_TICKS === 0);
+  const bitCount = mask => { let n=0; for(;mask;mask&=mask-1)n++; return n; };
+  function canFinish(time, mask) {
+    if (time === BAR_TICKS) return bitCount(mask) >= minimumTypes;
+    const key = time * maskSize + mask;
+    if (!memo.has(key)) memo.set(key, choices.some(d => fits(d,time) && canFinish(time+blockLength(d),mask|(1<<d.family))));
+    return memo.get(key);
+  }
+  const measures = Array.from({length:bars}, () => {
+    let time=0, mask=0;
+    const events=[];
+    while (time < BAR_TICKS) {
+      const candidates=choices.filter(d=>fits(d,time)&&canFinish(time+blockLength(d),mask|(1<<d.family))).map(d=>{
+        const options=selection[d.id];
+        const availability=(options.notes?1-restChance:0)+(options.rests?restChance:0);
+        return {d,weight:(mask&(1<<d.family)?1:3)*(d.dotted?0.55:1)*availability};
+      });
+      let pick=random()*candidates.reduce((sum,c)=>sum+c.weight,0);
+      const {d}=candidates.find(c=>(pick-=c.weight)<0) || candidates[candidates.length-1];
+      const tuplet=d.tupletCount?time:null;
+      const count=d.tupletCount||1;
+      for(let j=0;j<count;j++) {
+        const options=selection[d.id];
+        const rest=options.rests && (!options.notes || random()<restChance);
+        events.push({type:d.id,ticks:d.ticks,dotted:d.dotted,time,rest:Boolean(rest),tuplet});
+        time+=d.ticks;
+      }
+      mask|=1<<d.family;
+    }
+    return simplify?simplifyMeasure(events,selection):events;
+  });
+  return {bars, measures};
+}
+function makeAccentEtude(bars,beats,notes,maxAccents,random=Math.random) {
+  if(!Number.isInteger(bars)||bars<1||bars>256)throw new RangeError('Количество тактов должно быть от 1 до 256.');
+  if(!Number.isInteger(beats)||beats<1||beats>64)throw new RangeError('Долей в такте должно быть от 1 до 64.');
+  if(!Number.isInteger(notes)||notes<1||notes>64)throw new RangeError('Нот в доле должно быть от 1 до 64.');
+  if(!Number.isInteger(maxAccents)||maxAccents<1||maxAccents>notes)throw new RangeError('Максимум акцентов — от 1 до числа нот в доле.');
+  const type=({1:'quarter',2:'eighth',3:'triplet',4:'sixteenth',5:'quintuplet',6:'sextuplet'})[notes]||'sixteenth';
+  const beams=Math.floor(Math.log2(notes)),isTuplet=(notes&(notes-1))!==0;
+  const accentPositions=[];
+  const measures=Array.from({length:bars},()=>{
+    const events=[],barPositions=[];
+    for(let beat=0;beat<beats;beat++){
+      const count=1+Math.floor(random()*maxAccents);
+      const positions=Array.from({length:notes},(_,i)=>i+1);
+      for(let i=0;i<count;i++){
+        const j=i+Math.floor(random()*(notes-i));
+        [positions[i],positions[j]]=[positions[j],positions[i]];
+      }
+      const selected=positions.slice(0,count).sort((a,b)=>a-b),hits=new Set(selected);
+      barPositions.push(selected);
+      for(let i=0;i<notes;i++)events.push({type,beams,beat,ticks:QUARTER_TICKS/notes,time:beat*QUARTER_TICKS+i*QUARTER_TICKS/notes,rest:!hits.has(i+1),dotted:false,tuplet:isTuplet?beat*QUARTER_TICKS:null,tupletCount:isTuplet?notes:undefined,position:i+1});
+    }
+    accentPositions.push(barPositions);
+    return events;
+  });
+  return {mode:'accents',bars,beats,subdivision:notes,maxAccents,measures,accentPositions};
+}
+function accentText(etude) {
+  return etude.accentPositions.map(bar=>'['+bar.map(positions=>positions.join(etude.subdivision>9?',':'')).join('-')+']');
+}
+function exerciseTitle(etude) { return etude.mode==='accents'?'Акценты':'Ритмический этюд'; }
+function exerciseMeter(etude) { return `${etude.beats||4}/4`; }
+function eventBeams(event) { return event.beams??DURATIONS.find(d=>d.id===event.type).beams; }
+function stemTop(event) { return Math.min(36,70-eventBeams(event)*7); }
+function simplifyMeasure(measure,selection = {}) {
+  // Generation checkboxes do not restrict the spelling of an existing rhythm.
+  const palette=DURATIONS.filter(d=>!d.tupletCount).flatMap(d=>durationVariants(d,Boolean(selection.eighth?.dotted))).sort((a,b)=>b.ticks-a.ticks);
+  const notes=palette,rests=palette;
+  const restMemo=new Map([[0,[]]]);
+  // Minimum-symbol spelling of silence using all ordinary durations.
+  function spellRests(ticks) {
+    if(restMemo.has(ticks))return restMemo.get(ticks);
+    let best=null;
+    for(const duration of rests)if(duration.ticks<=ticks) {
+      const tail=spellRests(ticks-duration.ticks);
+      if(tail && (!best || tail.length+1<best.length))best=[duration,...tail];
+    }
+    restMemo.set(ticks,best);
+    return best;
+  }
+  const eventFrom=(duration,time,rest)=>({type:duration.id,ticks:duration.ticks,dotted:duration.dotted,time,rest,tuplet:null});
+  function placeRests(durations,time) {
+    return durations.map(duration=>{const event=eventFrom(duration,time,true);time+=duration.ticks;return event;});
+  }
+  const result=[];
+  for(let i=0;i<measure.length;) {
+    // Keep every tuplet position and bracket intact; never cross its boundary.
+    if(measure[i].tuplet!=null){result.push({...measure[i++]});continue;}
+    const first=measure[i];
+    let end=i+1;
+    while(end<measure.length && measure[end].rest && measure[end].tuplet==null)end++;
+    const block=measure.slice(i,end);
+    const ticks=block.reduce((sum,event)=>sum+event.ticks,0);
+    let best=block;
+    if(first.rest) {
+      const spelling=spellRests(ticks);
+      if(spelling && spelling.length<best.length)best=placeRests(spelling,first.time);
+    } else {
+      const originalTail=spellRests(ticks-first.ticks);
+      if(originalTail && originalTail.length+1<best.length)best=[{...first},...placeRests(originalTail,first.time+first.ticks)];
+      // Absorb following silence, never an attack. This is percussion notation:
+      // a longer note still triggers one short drum hit at the original onset.
+      for(const duration of notes)if(duration.ticks>=first.ticks && duration.ticks<=ticks) {
+        const tail=spellRests(ticks-duration.ticks);
+        if(tail && tail.length+1<best.length)best=[eventFrom(duration,first.time,false),...placeRests(tail,first.time+duration.ticks)];
+      }
+    }
+    result.push(...best.map(event=>({...event})));
+    i=end;
+  }
+  return result;
+}
+function eventSpace(event) { return 19 + 13 * Math.sqrt(event.ticks / QUARTER_TICKS) + (event.dotted?7:0); }
+function measureMinWidth(measure) { return 26 + measure.reduce((sum,e)=>sum+eventSpace(e),0); }
+function noteGlyph(x,event,flagged) {
+  const beams=eventBeams(event),top=stemTop(event);
+  const head=event.type==='half' ? 'fill="none" stroke="currentColor" stroke-width="1.7"' : 'fill="currentColor"';
+  let out=`<ellipse cx="${x}" cy="73" rx="6" ry="4.2" transform="rotate(-22 ${x} 73)" ${head}/><path d="M${x+5} 72V${top}" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+  if(flagged)for(let j=0;j<beams;j++)out+=`<path d="M${x+5} ${top+j*7}c3 5 10 6 10 14c0 4-2 8-4 10c4-10 1-14-6-16z"/>`;
+  return out;
+}
+function restGlyph(x,type,customBeams) {
+  if(type==='half')return `<path d="M${x-9} 62h18" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="${x-6}" y="57" width="12" height="5"/>`;
+  if(type==='quarter')return `<path d="M${x-4} 42l10 12c2 3-6 7-5 10l6 10c-10-5-14 0-7 9c-12-6-13-16-2-16l-8-10c-2-3 6-7 5-10z"/>`;
+  const beams=customBeams??DURATIONS.find(d=>d.id===type).beams, top=55-(beams-1)*5;
+  let out=`<path d="M${x+6} ${top-1}L${x-2} 81" fill="none" stroke="currentColor" stroke-width="1.9"/>`;
+  for(let j=0;j<beams;j++){
+    const y=top+j*7;
+    out+=`<circle cx="${x-4-j*1.7}" cy="${y}" r="3.2"/><path d="M${x-4-j*1.7} ${y+2}Q${x+1} ${y+7} ${x+6-j*1.7} ${y-1}" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+  }
+  return out;
+}
+function drawMeasure(measure,width) {
+  const weight=measure.reduce((sum,e)=>sum+eventSpace(e),0);
+  let cursor=15;
+  const xs=measure.map(e=>{const x=cursor;cursor+=eventSpace(e)*(width-26)/weight;return x;});
+  const beams=measure.map(eventBeams);
+  const connected=(i,j)=>j>=0&&j<measure.length&&!measure[i].rest&&!measure[j].rest&&beams[i]>0&&beams[j]>0&&(measure[i].beat??Math.floor(measure[i].time/QUARTER_TICKS))===(measure[j].beat??Math.floor(measure[j].time/QUARTER_TICKS))&&measure[i].tuplet===measure[j].tuplet;
+  let out='';
+  measure.forEach((event,i)=>{
+    out+=`<g data-event="${i}">${event.rest?restGlyph(xs[i],event.type,beams[i]):noteGlyph(xs[i],event,!connected(i,i-1)&&!connected(i,i+1))}${event.dotted?`<circle class="augmentation-dot" cx="${xs[i]+12}" cy="${event.rest?62:71}" r="1.9"/>`:""}</g>`;
+    const top=stemTop(event);
+    if(connected(i,i+1))out+=`<path d="M${xs[i]+5} ${top}H${xs[i+1]+5}" fill="none" stroke="currentColor" stroke-width="3.7"/>`;
+    if(!event.rest&&(connected(i,i-1)||connected(i,i+1)))for(let level=1;level<beams[i];level++){
+      if(connected(i,i+1)&&beams[i+1]>level)out+=`<path d="M${xs[i]+5} ${top+level*7}H${xs[i+1]+5}" fill="none" stroke="currentColor" stroke-width="3.7"/>`;
+      else if(!(connected(i,i-1)&&beams[i-1]>level)){
+        const direction=connected(i,i+1)?1:-1;
+        out+=`<path d="M${xs[i]+5} ${top+level*7}h${direction*8}" fill="none" stroke="currentColor" stroke-width="3.7"/>`;
+      }
+    }
+    if(event.tuplet!=null && (i===0||measure[i-1].tuplet!==event.tuplet)){
+      const count=event.tupletCount??DURATIONS.find(d=>d.id===event.type).tupletCount;
+      const start=xs[i]-7,end=xs[i+count-1]+10,mid=(start+end)/2;
+      out+=`<path d="M${start} 27v-6H${mid-9}M${mid+9} 21H${end}v6" fill="none" stroke="currentColor" stroke-width="1"/><text x="${mid}" y="25" text-anchor="middle" font-size="14" font-style="italic" font-family="Georgia,serif">${count}</text>`;
+    }
+  });
+  return out;
+}
+function layoutScore(etude,availableWidth,forcedColumns,firstBar=0,lastBar=etude.bars) {
+  const widest=Math.max(...etude.measures.slice(firstBar,lastBar).map(measureMinWidth));
+  const columns=forcedColumns || (etude.bars>=4 && widest*4<=availableWidth ? 4 : 2);
+  const width=Math.max(availableWidth,widest*columns);
+  const measureWidth=width/columns;
+  const rows=[];
+  for(let start=firstBar;start<lastBar;start+=columns){
+    let content='<path d="M1 35V85" fill="none" stroke="currentColor" stroke-width="1.1"/>';
+    const end=Math.min(lastBar,start+columns);
+    for(let i=start;i<end;i++){
+      const offset=(i-start)*measureWidth;
+      content+=`<g data-measure="${i}" transform="translate(${offset} 0)"><rect class="playback-bar" x="2" y="12" width="${measureWidth-7}" height="80" rx="5" fill="#f4ecd2" opacity="0"/>${drawMeasure(etude.measures[i],measureWidth)}</g>`;
+      const x=offset+measureWidth-4;
+      content+=`<path d="M${x} 35V85" fill="none" stroke="currentColor" stroke-width="1.1"/>`;
+      if(i===etude.bars-1)content+=`<path d="M${x+3} 35V85" fill="none" stroke="currentColor" stroke-width="2.5"/>`;
+    }
+    rows.push({start,end,width,height:101,content});
+  }
+  return {columns,width,rows};
+}
+function scoreSVG(etude,columns) {
+  const layout=layoutScore(etude,1100,columns);
+  const width=layout.width+48,height=96+layout.rows.length*112;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="#242821" color="#242821"><title>${exerciseTitle(etude)}, ${etude.bars} тактов, ${exerciseMeter(etude)}</title><rect width="100%" height="100%" fill="#fffdf8"/><text x="24" y="35" font-family="Georgia,serif" font-size="25">${exerciseTitle(etude)} · ${exerciseMeter(etude)}</text><text x="24" y="60" font-family="sans-serif" font-size="12">Тактов: ${etude.bars}</text>${layout.rows.map((r,i)=>`<g transform="translate(24 ${78+i*112})">${r.content}</g>`).join('')}</svg>`;
+}
+function scorePDFPages(etude) {
+  const width=595.28,height=841.89,margin=36,top=88,bottom=height-48;
+  const layout=layoutScore(etude,1100);
+  const scale=(width-margin*2)/layout.width;
+  const rowHeight=101*scale,step=Math.max(64,rowHeight+14);
+  const rowsPerPage=Math.max(1,Math.floor((bottom-top-rowHeight)/step)+1);
+  const pageCount=Math.ceil(layout.rows.length/rowsPerPage);
+  return Array.from({length:pageCount},(_,page)=>{
+    const rows=layout.rows.slice(page*rowsPerPage,(page+1)*rowsPerPage);
+    const content=rows.map((row,i)=>`<g transform="translate(${margin} ${top+i*step}) scale(${scale})">${row.content}</g>`).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="#242821" color="#242821"><rect width="100%" height="100%" fill="white"/><text x="${margin}" y="45" font-family="Georgia,serif" font-size="19">${exerciseTitle(etude)} · ${exerciseMeter(etude)}</text><text x="${margin}" y="66" font-family="sans-serif" font-size="10">Тактов: ${etude.bars} · Такты ${rows[0].start+1}–${rows[rows.length-1].end}</text>${content}<text x="${width-margin}" y="${height-25}" text-anchor="end" font-family="sans-serif" font-size="9">${page+1} / ${pageCount}</text></svg>`;
+  });
+}
+// Embed browser-rendered pages in a PDF, with byte offsets for binary JPEG data.
+function makePDF(images) {
+  const encoder=new TextEncoder(),chunks=[],offsets=[0];
+  let length=0;
+  function append(value) {
+    const bytes=typeof value==='string'?encoder.encode(value):value;
+    chunks.push(bytes);length+=bytes.length;
+  }
+  function object(id,body,stream) {
+    offsets[id]=length;append(`${id} 0 obj\n${body}`);
+    if(stream){append('\nstream\n');append(stream);append('\nendstream');}
+    append('\nendobj\n');
+  }
+  append('%PDF-1.4\n');append(new Uint8Array([37,226,227,207,211,10]));
+  object(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  object(2,`<< /Type /Pages /Count ${images.length} /Kids [${images.map((_,i)=>`${3+i*3} 0 R`).join(' ')}] >>`);
+  images.forEach((image,i)=>{
+    const id=3+i*3;
+    object(id,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /PageImage ${id+2} 0 R >> >> /Contents ${id+1} 0 R >>`);
+    const commands=encoder.encode('q\n595.28 0 0 841.89 0 0 cm\n/PageImage Do\nQ\n');
+    object(id+1,`<< /Length ${commands.length} >>`,commands);
+    object(id+2,`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>`,image.bytes);
+  });
+  const start=length;
+  append(`xref\n0 ${offsets.length}\n0000000000 65535 f \n`);
+  for(const offset of offsets.slice(1))append(`${String(offset).padStart(10,'0')} 00000 n \n`);
+  append(`trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${start}\n%%EOF\n`);
+  const result=new Uint8Array(length);
+  let cursor=0;
+  for(const chunk of chunks){result.set(chunk,cursor);cursor+=chunk.length;}
+  return result;
+}
+function makePlaybackPlan(etude,bpm,metronome=false) {
+  if(!Number.isInteger(bpm)||bpm<40||bpm>240)throw new RangeError('Темп должен быть целым числом от 40 до 240.');
+  const secondsPerTick=60/bpm/QUARTER_TICKS,beats=etude.beats||4;
+  const sounds=[],positions=[];
+  etude.measures.forEach((measure,bar)=>measure.forEach((event,index)=>{
+    const at=(bar*beats*QUARTER_TICKS+event.time)*secondsPerTick;
+    positions.push({at,end:at+event.ticks*secondsPerTick,bar,index});
+    if(!event.rest)sounds.push({at,kind:'drum'});
+  }));
+  if(metronome)for(let beat=0;beat<etude.bars*beats;beat++)sounds.push({at:beat*60/bpm,kind:beat%beats===0?'accent':'click'});
+  sounds.sort((a,b)=>a.at-b.at);
+  return {sounds,positions,duration:etude.bars*beats*60/bpm,bars:etude.bars};
+}
+function makeSoundBuffer(context,kind) {
+  const duration=kind==='drum'?0.11:0.035;
+  const buffer=context.createBuffer(1,Math.ceil(context.sampleRate*duration),context.sampleRate);
+  const data=buffer.getChannelData(0);
+  let previous=0;
+  for(let i=0;i<data.length;i++) {
+    const t=i/context.sampleRate,attack=Math.min(1,t/0.0015);
+    if(kind==='drum') {
+      const noise=Math.random()*2-1;
+      data[i]=attack*((noise-previous)*0.24*Math.exp(-t*60)+Math.sin(2*Math.PI*170*t)*0.4*Math.exp(-t*45));
+      previous=noise;
+    } else data[i]=attack*Math.sin(2*Math.PI*(kind==='accent'?1760:1320)*t)*0.32*Math.exp(-t*150);
+  }
+  return buffer;
+}
+class RhythmPlayer {
+  constructor(context,hooks={},timers={setInterval:(fn,ms)=>setInterval(fn,ms),clearInterval:id=>clearInterval(id),requestAnimationFrame:fn=>requestAnimationFrame(fn),cancelAnimationFrame:id=>cancelAnimationFrame(id)}) {
+    this.context=context;this.hooks=hooks;this.timers=timers;this.playing=false;this.sources=new Set();
+    this.gain=context.createGain();this.gain.gain.value=0.6;this.gain.connect(context.destination);
+    this.buffers=Object.fromEntries(['drum','click','accent'].map(kind=>[kind,makeSoundBuffer(context,kind)]));
+  }
+  setVolume(value) { this.gain.gain.setTargetAtTime(Math.max(0,Math.min(1,value)),this.context.currentTime,0.01); }
+  play(plan) {
+    this.stop();
+    this.plan=plan;this.startTime=this.context.currentTime+0.08;this.nextSound=0;this.visualIndex=0;this.playing=true;
+    this.interval=this.timers.setInterval(()=>this.schedule(),25);
+    this.schedule();this.animate();
+  }
+  schedule() {
+    if(!this.playing)return;
+    if(this.context.state!=='running'){this.stop('interrupted');return;}
+    const now=this.context.currentTime;
+    if(now>=this.startTime+this.plan.duration){this.stop('ended');return;}
+    while(this.nextSound<this.plan.sounds.length) {
+      const sound=this.plan.sounds[this.nextSound],when=this.startTime+sound.at;
+      if(when>now+0.15)break;
+      // If the tab was suspended, stop instead of playing missed hits in a burst.
+      if(when<now-0.04){this.stop('interrupted');return;}
+      const source=this.context.createBufferSource();
+      source.buffer=this.buffers[sound.kind];source.connect(this.gain);
+      source.onended=()=>{this.sources.delete(source);source.disconnect();};
+      this.sources.add(source);source.start(when);this.nextSound++;
+    }
+  }
+  animate() {
+    if(!this.playing)return;
+    const elapsed=this.context.currentTime-this.startTime;
+    if(elapsed>=0) {
+      while(this.visualIndex+1<this.plan.positions.length && this.plan.positions[this.visualIndex+1].at<=elapsed)this.visualIndex++;
+      this.hooks.onPosition?.(this.plan.positions[this.visualIndex]);
+    }
+    this.frame=this.timers.requestAnimationFrame(()=>this.animate());
+  }
+  stop(reason='stopped') {
+    const wasPlaying=this.playing;this.playing=false;
+    this.timers.clearInterval(this.interval);this.timers.cancelAnimationFrame(this.frame);
+    for(const source of this.sources){source.onended=null;try{source.stop();}catch{}source.disconnect();}
+    this.sources.clear();
+    if(wasPlaying)this.hooks.onStop?.(reason);
+  }
+}
+// Browser interface. Rhythm, notation, audio scheduling and exports also run without a DOM.
+if(typeof document!=='undefined') {
+  const $=id=>document.getElementById(id);
+  const form=$('generator'),accentForm=$('accent-generator'),lines=$('score-lines');
+  const states={etudes:{etude:null,page:0},accents:{etude:null,page:0}};
+  let mode='etudes',etude=null,layout=null,printing=false;
+  let audio=null,player=null,startVersion=0,activeGlyph=null,activeMeasure=null,lastPosition=null;
+  const restPercent=()=>Math.min(99,Number($('rest-chance').value));
+  $('rest-chance').addEventListener('input',()=>{
+    const value=restPercent()+'%';$('rest-value').value=value;
+    $('rest-chance').setAttribute('aria-valuenow',restPercent());$('rest-chance').setAttribute('aria-valuetext',value);$('error').hidden=true;
+  });
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme=theme;
+    $('theme-toggle').textContent=theme==='dark'?'Светлая тема':'Тёмная тема';
+    $('theme-toggle').setAttribute('aria-label',theme==='dark'?'Включить светлую тему':'Включить тёмную тему');
+    document.querySelector('meta[name="theme-color"]').content=theme==='dark'?'#161b18':'#f5f2eb';
+  }
+  applyTheme(document.documentElement.dataset.theme==='dark'?'dark':'light');
+  $('theme-toggle').addEventListener('click',()=>{
+    const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme(theme);
+    try{localStorage.setItem('rhythm-practice-theme',theme);}catch{}
+  });
+  function playbackControls(busy) {
+    $('play').disabled=busy||!etude;$('stop').disabled=!busy;$('tempo').disabled=busy;$('metronome').disabled=busy;
+  }
+  function clearHighlight() {
+    activeGlyph?.classList.remove('active-event');activeMeasure?.classList.remove('active-measure');
+    activeGlyph=null;activeMeasure=null;lastPosition=null;$('position').textContent='';
+  }
+  function barsPerPage() {
+    return mode==='accents'?Math.max(1,Math.min(16,Math.floor(1024/(etude.beats*etude.subdivision)))):etude.bars;
+  }
+  function paintPosition(position) {
+    if(!position)return;
+    const page=Math.floor(position.bar/barsPerPage());
+    if(states[mode].page!==page){states[mode].page=page;renderScore();}
+    if(activeGlyph?.isConnected&&lastPosition?.bar===position.bar&&lastPosition?.index===position.index)return;
+    activeGlyph?.classList.remove('active-event');activeMeasure?.classList.remove('active-measure');
+    activeMeasure=lines.querySelector(`[data-measure="${position.bar}"]`);
+    activeGlyph=activeMeasure?.querySelector(`[data-event="${position.index}"]`);
+    activeMeasure?.classList.add('active-measure');activeGlyph?.classList.add('active-event');
+    lastPosition=position;$('position').textContent=`Такт ${position.bar+1} из ${etude.bars}`;
+  }
+  function stopped(reason) {
+    playbackControls(false);clearHighlight();
+    $('player-status').textContent=reason==='ended'?'Упражнение сыграно. Можно слушать снова.':reason==='interrupted'?'Воспроизведение прервано. Нажми «Слушать», чтобы начать заново.':'Воспроизведение остановлено.';
+  }
+  function stopPlayback() {startVersion++;player?.stop();playbackControls(false);clearHighlight();}
+  $('play').addEventListener('click',async()=>{
+    if(!etude||!$('tempo').reportValidity())return;
+    const version=++startVersion;playbackControls(true);$('player-status').textContent='Подготовка звука…';
+    try {
+      if(!audio||audio.state==='closed') {
+        const AudioContext=window.AudioContext||window.webkitAudioContext;
+        if(!AudioContext)throw new Error('Этот браузер не поддерживает звук. Открой приложение в Safari, Chrome или Firefox.');
+        audio=new AudioContext();player=new RhythmPlayer(audio,{onPosition:paintPosition,onStop:stopped});
+        audio.addEventListener('statechange',()=>{if(player.playing&&audio.state!=='running')player.stop('interrupted');});
+      }
+      await audio.resume();if(version!==startVersion)return;
+      if(audio.state!=='running')throw new Error('Не удалось включить звук. Попробуй нажать «Слушать» ещё раз.');
+      player.setVolume(Number($('volume').value)/100);
+      player.play(makePlaybackPlan(etude,Number($('tempo').value),$('metronome').checked));
+      $('player-status').textContent=mode==='accents'?'Играют акценты. Позиции без акцента молчат.':'Играет этюд. Текущая нота или пауза подсвечена.';
+    }catch(error){if(version===startVersion){stopPlayback();$('player-status').textContent=error.message||'Не удалось включить звук.';}}
+  });
+  $('stop').addEventListener('click',()=>{stopPlayback();$('player-status').textContent='Воспроизведение остановлено.';});
+  $('volume').addEventListener('input',()=>player?.setVolume(Number($('volume').value)/100));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){const busy=$('play').disabled;stopPlayback();if(busy)$('player-status').textContent='Воспроизведение остановлено при смене вкладки.';}});
+  window.addEventListener('pagehide',stopPlayback);
+  function renderScore(width=lines.clientWidth) {
+    if(!etude)return;
+    const pageSize=printing?etude.bars:barsPerPage();
+    const first=printing?0:states[mode].page*pageSize,last=Math.min(etude.bars,first+pageSize);
+    const dense=mode==='accents'&&etude.beats*etude.subdivision>24;
+    const columns=!printing&&(dense||window.matchMedia('(max-width:700px)').matches)?1:undefined;
+    layout=layoutScore(etude,Math.max(200,width),columns,first,last);
+    lines.replaceChildren();
+    layout.rows.forEach(row=>{
+      const description=etude.measures.slice(row.start,row.end).map((m,i)=>`Такт ${row.start+i+1}: ${m.map(e=>mode==='accents'?`доля ${e.beat+1}, позиция ${e.position}, ${e.rest?'пауза':'акцент'}`:`${DURATIONS.find(d=>d.id===e.type).name}${e.rest?' пауза':' нота'}${e.dotted?' с точкой':''}`).join(', ')}`).join('. ');
+      const wrapper=document.createElement('div');wrapper.className='score-line'+(dense?' dense':'');wrapper.tabIndex=0;
+      if(dense)wrapper.style.setProperty('--dense-width',Math.ceil(row.width*0.85)+'px');
+      wrapper.setAttribute('aria-label',row.end-row.start===1?`Такт ${row.start+1}`:`Такты ${row.start+1}–${row.end}`);
+      wrapper.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${row.width} ${row.height}" fill="currentColor" role="img" aria-labelledby="row-${row.start}"><title id="row-${row.start}">${description}</title>${row.content}</svg>`;
+      lines.append(wrapper);
+    });
+    $('meta').textContent=`Тактов: ${etude.bars} · ${layout.columns} ${layout.columns===1?'такт':'такта'} в строке`;
+    const pageCount=Math.ceil(etude.bars/pageSize);
+    $('pagination').hidden=pageCount<=1;
+    $('page-label').textContent=`Такты ${first+1}–${last} из ${etude.bars}`;
+    $('previous-page').disabled=first===0;$('next-page').disabled=last===etude.bars;
+  }
+  for(const [id,direction] of [['previous-page',-1],['next-page',1]])$(id).addEventListener('click',()=>{stopPlayback();states[mode].page+=direction;renderScore();});
+  function showExercise() {
+    etude=states[mode].etude;if(!etude)return;
+    $('score-title').textContent=exerciseTitle(etude);$('meter').textContent=exerciseMeter(etude);
+    $('score-eyebrow').textContent=mode==='accents'?'Практика акцентов':'Практика чтения';
+    $('score-footer').innerHTML=mode==='accents'?`<span>Нота — акцент</span><span>Пауза — без акцента</span><span>${etude.maxAccents===1?'Один акцент в доле':`Акцентов в доле: 1–${etude.maxAccents}`}</span>`:'<span>Один такт = четыре четверти</span><span>Точки — только у восьмых</span><span>Скобки с 3, 5 и 6 — группы на одну долю</span>';
+    $('etude-help').hidden=mode!=='etudes';$('accent-help').hidden=mode!=='accents';$('accent-sequence').hidden=mode!=='accents';
+    if(mode==='accents'){
+      const bars=accentText(etude),rows=[];for(let i=0;i<bars.length;i+=4)rows.push(bars.slice(i,i+4).join(' '));
+      $('accent-text').textContent=rows.join('\n');
+    }
+    renderScore();playbackControls(false);
+    let hits=0,rests=0;for(const measure of etude.measures)for(const event of measure)event.rest?rests++:hits++;
+    $('status').textContent=`${mode==='accents'?'Акценты готовы':'Этюд готов'}. Нот: ${hits}, пауз: ${rests}.`;
+    $('player-status').textContent=mode==='accents'?'Слушать: ноты звучат, позиции без акцента молчат.':'Упражнение готово к прослушиванию.';
+  }
+  form.addEventListener('submit',event=>{
+    event.preventDefault();if(!form.reportValidity())return;
+    const selection=Object.fromEntries(GENERATION_DURATIONS.map(d=>[d.id,{notes:form.querySelector(`input[name="notes"][value="${d.id}"]`).checked,rests:form.querySelector(`input[name="rests"][value="${d.id}"]`).checked}]));
+    selection.eighth.dotted=$('dotted-eighth').checked;
+    try{states.etudes={etude:makeEtude(Number($('bars').value),selection,restPercent()/100),page:0};}catch(error){$('error').textContent=error.message;$('error').hidden=false;return;}
+    $('error').hidden=true;stopPlayback();showExercise();
+  });
+  function syncAccentLimit() {
+    if(!$('accent-notes').validity.valid)return;
+    const notes=Number($('accent-notes').value);$('accent-max').max=String(notes);
+    if(Number($('accent-max').value)>notes)$('accent-max').value=String(notes);
+  }
+  $('accent-notes').addEventListener('input',syncAccentLimit);$('accent-notes').addEventListener('change',syncAccentLimit);
+  accentForm.addEventListener('submit',event=>{
+    event.preventDefault();syncAccentLimit();if(!accentForm.reportValidity())return;
+    try{states.accents={etude:makeAccentEtude(Number($('accent-bars').value),Number($('accent-beats').value),Number($('accent-notes').value),Number($('accent-max').value)),page:0};}catch(error){$('accent-error').textContent=error.message;$('accent-error').hidden=false;return;}
+    $('accent-error').hidden=true;stopPlayback();showExercise();
+  });
+  form.addEventListener('change',()=>{$('error').hidden=true;});accentForm.addEventListener('change',()=>{$('accent-error').hidden=true;});
+  function activateTab(next) {
+    stopPlayback();mode=next;
+    for(const id of ['etudes','accents']){
+      const selected=id===mode;$('tab-'+id).setAttribute('aria-selected',selected);$('tab-'+id).tabIndex=selected?0:-1;$('panel-'+id).hidden=!selected;
+    }
+    try{history.replaceState(null,'','#'+mode);}catch{}
+    if(!states[mode].etude)(mode==='etudes'?form:accentForm).requestSubmit();else showExercise();
+  }
+  for(const id of ['etudes','accents']){
+    $('tab-'+id).addEventListener('click',()=>activateTab(id));
+    $('tab-'+id).addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();const next=event.key==='Home'?'etudes':event.key==='End'?'accents':id==='etudes'?'accents':'etudes';activateTab(next);$('tab-'+next).focus();
+    });
+  }
+  window.addEventListener('hashchange',()=>{const next=location.hash==='#accents'?'accents':'etudes';if(next!==mode)activateTab(next);});
+  let observedWidth=0;
+  new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(!printing&&Math.abs(width-observedWidth)>1){observedWidth=width;renderScore(width);}}).observe(lines);
+  window.addEventListener('beforeprint',()=>{stopPlayback();printing=true;renderScore(720);});
+  window.addEventListener('afterprint',()=>{printing=false;renderScore();});
+  function download(blob,filename) {
+    const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=filename;document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  async function renderPDFImage(svg) {
+    const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'})),canvas=document.createElement('canvas');
+    try {
+      const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Не удалось подготовить ноты для PDF.'));image.src=url;});
+      canvas.width=2480;canvas.height=3508;const context=canvas.getContext('2d');if(!context)throw new Error('Не удалось подготовить страницу PDF.');
+      context.drawImage(image,0,0,canvas.width,canvas.height);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.96));if(!blob)throw new Error('Не удалось сохранить страницу PDF.');
+      return {bytes:new Uint8Array(await blob.arrayBuffer()),width:canvas.width,height:canvas.height};
+    }finally{URL.revokeObjectURL(url);canvas.width=0;canvas.height=0;}
+  }
+  const filename=(exercise,extension)=>`${exercise.mode==='accents'?'drum-accents':'rhythm-etude'}-${exercise.beats||4}-4.${extension}`;
+  $('save-pdf').addEventListener('click',async()=>{
+    const button=$('save-pdf'),exercise=etude;button.disabled=true;button.textContent='Подготовка PDF…';stopPlayback();
+    try {
+      const pages=scorePDFPages(exercise),images=[];
+      for(const [i,page] of pages.entries()){
+        if(etude===exercise)$('status').textContent=`Подготовка PDF: страница ${i+1} из ${pages.length}…`;
+        images.push(await renderPDFImage(page));
+      }
+      download(new Blob([makePDF(images)],{type:'application/pdf'}),filename(exercise,'pdf'));
+      if(etude===exercise)$('status').textContent=`PDF готов к скачиванию. Страниц: ${pages.length}.`;
+    }catch(error){if(etude===exercise)$('status').textContent=error.message||'Не удалось создать PDF. Попробуй ещё раз.';}
+    finally{button.disabled=false;button.textContent='Скачать PDF';}
+  });
+  $('save').addEventListener('click',()=>{download(new Blob([scoreSVG(etude,layout.columns)],{type:'image/svg+xml;charset=utf-8'}),filename(etude,'svg'));$('status').textContent='Файл SVG подготовлен для скачивания.';});
+  $('copy-accents').addEventListener('click',async()=>{
+    try{await navigator.clipboard.writeText($('accent-text').textContent);$('status').textContent='Позиции акцентов скопированы.';}
+    catch{$('status').textContent='Не удалось скопировать. Выдели последовательность вручную.';}
+  });
+  activateTab(location.hash==='#accents'?'accents':'etudes');
+  if('serviceWorker' in navigator&&['https:','http:'].includes(location.protocol))navigator.serviceWorker.register('./sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{$('offline-status').textContent='Готово к работе без интернета';}).catch(()=>{});
+}
+
+</script>
+</body>
+</html>
