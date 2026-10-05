@@ -38,15 +38,17 @@ for(let mask=1;mask<=combinationCount;mask++) for(const dotted of [false,true]) 
         } else assert.equal(event.tuplet,null);
         time+=event.ticks;
       }
+      assert.ok(measure.every(e=>e.tuplet!=null || e.time%quarter===0 || e.time%quarter+e.ticks<=quarter),'Generation keeps beats visible before simplification');
       assert.equal(time,quarter*4);
       assert.ok(new Set(measure.map(e=>e.type)).size>=Math.min(2,available.length));
       const simplified=core.simplifyMeasure(measure,selection);
-      assert.ok(simplified.length<=measure.length);
+      // Showing a beat boundary may require an extra rest.
       assert.deepEqual(Array.from(simplified.filter(e=>!e.rest),e=>e.time),Array.from(measure.filter(e=>!e.rest),e=>e.time));
       let simplifiedTime=0;
       for(const event of simplified){
         assert.equal(event.time,simplifiedTime);simplifiedTime+=event.ticks;
-        assert.ok(!event.dotted || (event.rest ? ['quarter','eighth'].includes(event.type) : dotted && event.type==='eighth'));
+        assert.ok(!event.dotted || (event.rest ? ['quarter','eighth'].includes(event.type) : event.type==='eighth' && (dotted || event.time%quarter===quarter/4)));
+        if(event.tuplet==null)assert.ok(event.time%quarter===0 || event.time%quarter+event.ticks<=quarter,'An offbeat symbol cannot hide the next beat');
         assert.equal(event.ticks,defs.find(d=>d.id===event.type).ticks*(event.dotted?1.5:1));
       }
       assert.equal(simplifiedTime,quarter*4);

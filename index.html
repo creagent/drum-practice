@@ -73,8 +73,8 @@ button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(-
 <details class="help" id="etude-help"><summary>Как устроен этюд</summary>
 <p>Размер всегда 4/4. Для исходного ритма можно выбрать восьмые, триоли, шестнадцатые, квинтоли и секстоли. Ноты и паузы включаются отдельно. Общий ползунок задаёт вероятность паузы в каждой позиции, в том числе внутри групп. При 0% пауз нет. По умолчанию включены ноты и паузы только восьмых и шестнадцатых.</p>
 <p>Триоль, квинтоль и секстоль занимают одну четвертную долю и состоят из 3, 5 и 6 равных позиций. Каждая позиция может быть нотой или паузой — вся группа не обязана состоять из ударов. Полностью звучащая группа тоже может случайно получиться. Если выключить паузы для длительности, останутся только ноты.</p>
-<p>После генерации соседние паузы объединяются, а нота может поглотить следующую за ней паузу. Например, шестнадцатая нота и шестнадцатая пауза превращаются в восьмую. Для упрощения доступны половинные, четвертные, восьмые и шестнадцатые независимо от галочек. Два отдельных удара не объединяются; моменты звучания сохраняются. Объединение не пересекает тактовые черты и группы триолей, квинтолей и секстолей.</p>
-<p>Галочка «Ноты с точкой» разрешает восьмые ноты с точкой — при генерации и объединении. Они занимают три четверти доли. Восьмые и четвертные паузы с точкой используются автоматически при объединении, независимо от галочек; они длятся три четверти и полторы доли соответственно. У половинных и четвертных нот точек нет. Из-за случайного выбора и объединения знаков итоговая доля пауз может отличаться от значения ползунка.</p>
+<p>После генерации соседние паузы объединяются, а нота может поглотить следующую за ней паузу. Например, шестнадцатая нота и шестнадцатая пауза превращаются в восьмую. Для упрощения доступны половинные, четвертные, восьмые и шестнадцатые независимо от галочек. Два отдельных удара не объединяются; моменты звучания сохраняются. Границы долей важнее числа знаков: нота или пауза, начавшаяся внутри четвертной доли, не продлевается за её конец. При необходимости длинная нота сокращается, а остаток записывается паузой — новый удар не добавляется. Четвертные и половинные могут занимать целые доли, начинаясь на их границе. Объединение не пересекает тактовые черты и группы триолей, квинтолей и секстолей.</p>
+<p>Галочка «Ноты с точкой» разрешает восьмые ноты с точкой — при генерации и объединении. Они занимают три четверти доли. При разделении длинного интервала по долям восьмая с точкой также может появиться автоматически, чтобы завершить начатую долю. Восьмые и четвертные паузы с точкой используются автоматически при объединении, независимо от галочек; они длятся три четверти и полторы доли соответственно. У половинных и четвертных нот точек нет. Из-за случайного выбора и объединения знаков итоговая доля пауз может отличаться от значения ползунка.</p>
 <p>«Слушать» проигрывает короткие барабанные удары в выбранном темпе. Паузы молчат; метроном отмечает четверти. «Стоп» завершает воспроизведение. «Скачать PDF» сохраняет этюд на страницах A4, а SVG — одним векторным файлом. На телефоне в строке один такт. На широком экране — четыре, если они помещаются, иначе два.</p>
 </details>
 <details class="help" id="accent-sequence" hidden><summary>Позиции акцентов цифрами</summary><p>Дефисы разделяют доли. Например, [13-2-2-23] — первая и третья позиции в первой доле, вторая во второй и третьей, вторая и третья в четвёртой.</p><pre id="accent-text" class="accent-text"></pre><button id="copy-accents" type="button">Скопировать позиции</button></details>
@@ -101,6 +101,10 @@ function durationVariants(duration, dottedEighth = false) {
   const plain={...duration,dotted:false};
   return duration.id === 'eighth' && dottedEighth ? [plain,{...duration,ticks:duration.ticks*1.5,dotted:true}] : [plain];
 }
+function respectsBeat(time,ticks) {
+  const offset=time%QUARTER_TICKS;
+  return offset===0 || offset+ticks<=QUARTER_TICKS;
+}
 function makeEtude(bars, selection, restChance = 0.3, random = Math.random, simplify = true) {
   if (!Number.isInteger(bars) || bars < 1 || bars > 64) throw new RangeError('Количество тактов должно быть от 1 до 64.');
   if (!Number.isFinite(restChance) || restChance < 0 || restChance > 0.99) throw new RangeError('Количество пауз должно быть от 0 до 99%.');
@@ -112,7 +116,7 @@ function makeEtude(bars, selection, restChance = 0.3, random = Math.random, simp
   const maskSize = 2 ** families.length;
   const memo = new Map();
   const blockLength = d => d.tupletCount ? QUARTER_TICKS : d.ticks;
-  const fits = (d, time) => time + blockLength(d) <= BAR_TICKS && (!d.tupletCount || time % QUARTER_TICKS === 0);
+  const fits = (d, time) => time + blockLength(d) <= BAR_TICKS && (d.tupletCount ? time % QUARTER_TICKS === 0 : respectsBeat(time,d.ticks));
   const bitCount = mask => { let n=0; for(;mask;mask&=mask-1)n++; return n; };
   function canFinish(time, mask) {
     if (time === BAR_TICKS) return bitCount(mask) >= minimumTypes;
@@ -184,16 +188,18 @@ function simplifyMeasure(measure,selection = {}) {
   const notes=ordinary.flatMap(d=>durationVariants(d,Boolean(selection.eighth?.dotted))).sort((a,b)=>b.ticks-a.ticks);
   // Dotted rests simplify silence independently of the note-dot checkbox.
   const rests=ordinary.flatMap(d=>[{...d,dotted:false},...(['quarter','eighth'].includes(d.id)?[{...d,ticks:d.ticks*1.5,dotted:true}]:[])]).sort((a,b)=>b.ticks-a.ticks);
-  const restMemo=new Map([[0,[]]]);
-  // Minimum-symbol spelling of silence using all ordinary durations.
-  function spellRests(ticks) {
-    if(restMemo.has(ticks))return restMemo.get(ticks);
+  const restMemo=new Map();
+  // Silence is spelled at its actual position: beat boundaries outrank symbol count.
+  function spellRests(ticks,time) {
+    if(ticks===0)return [];
+    const key=`${time%QUARTER_TICKS}:${ticks}`;
+    if(restMemo.has(key))return restMemo.get(key);
     let best=null;
-    for(const duration of rests)if(duration.ticks<=ticks) {
-      const tail=spellRests(ticks-duration.ticks);
+    for(const duration of rests)if(duration.ticks<=ticks && respectsBeat(time,duration.ticks)) {
+      const tail=spellRests(ticks-duration.ticks,time+duration.ticks);
       if(tail && (!best || tail.length+1<best.length))best=[duration,...tail];
     }
-    restMemo.set(ticks,best);
+    restMemo.set(key,best);
     return best;
   }
   const eventFrom=(duration,time,rest)=>({type:duration.id,ticks:duration.ticks,dotted:duration.dotted,time,rest,tuplet:null});
@@ -209,20 +215,29 @@ function simplifyMeasure(measure,selection = {}) {
     while(end<measure.length && measure[end].rest && measure[end].tuplet==null)end++;
     const block=measure.slice(i,end);
     const ticks=block.reduce((sum,event)=>sum+event.ticks,0);
-    let best=block;
+    let best=null;
     if(first.rest) {
-      const spelling=spellRests(ticks);
-      if(spelling && spelling.length<best.length)best=placeRests(spelling,first.time);
+      const spelling=spellRests(ticks,first.time);
+      if(spelling)best=placeRests(spelling,first.time);
     } else {
-      const originalTail=spellRests(ticks-first.ticks);
-      if(originalTail && originalTail.length+1<best.length)best=[{...first},...placeRests(originalTail,first.time+first.ticks)];
-      // Absorb following silence, never an attack. This is percussion notation:
-      // a longer note still triggers one short drum hit at the original onset.
-      for(const duration of notes)if(duration.ticks>=first.ticks && duration.ticks<=ticks) {
-        const tail=spellRests(ticks-duration.ticks);
-        if(tail && tail.length+1<best.length)best=[eventFrom(duration,first.time,false),...placeRests(tail,first.time+duration.ticks)];
+      const remainingBeat=QUARTER_TICKS-first.time%QUARTER_TICKS;
+      const validNote=respectsBeat(first.time,first.ticks);
+      // Keep an already readable note on ties; only absorb silence if it saves signs.
+      const originalTail=validNote?spellRests(ticks-first.ticks,first.time+first.ticks):null;
+      if(originalTail)best=[{...first},...placeRests(originalTail,first.time+first.ticks)];
+      // A dotted eighth may finish a partial beat when splitting a longer span.
+      // This spelling repair is available even when random dotted notes are off.
+      const candidates=!selection.eighth?.dotted && first.time%QUARTER_TICKS===QUARTER_TICKS/4 && ticks>remainingBeat
+        ? [...notes,{...DURATIONS.find(d=>d.id==='eighth'),ticks:QUARTER_TICKS*3/4,dotted:true}]
+        : notes;
+      const minimumTicks=validNote?first.ticks:remainingBeat;
+      // Absorb following silence, never an attack; shorten a crossing note at the beat.
+      for(const duration of candidates)if(duration.ticks>=minimumTicks && duration.ticks<=ticks && respectsBeat(first.time,duration.ticks)) {
+        const tail=spellRests(ticks-duration.ticks,first.time+duration.ticks);
+        if(tail && (!best || tail.length+1<best.length))best=[eventFrom(duration,first.time,false),...placeRests(tail,first.time+duration.ticks)];
       }
     }
+    if(!best)throw new Error('Не удалось записать ритм по долям.');
     result.push(...best.map(event=>({...event})));
     i=end;
   }

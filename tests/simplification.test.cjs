@@ -39,6 +39,30 @@ for(const [items,type,ticks] of [
     assert.equal((core.drawMeasure(simplified,240).match(/class="augmentation-dot"/g)||[]).length,1);
   }
 }
+
+// The circled passage: 16th rest, quarter note, 16th note, eighth rest.
+// Preserve both attacks while revealing the beat between them.
+const circled=sequence([['sixteenth',true],['quarter'],['sixteenth'],['eighth',true]]);
+const readable=core.simplifyMeasure(circled,sixteenths);
+assert.deepEqual(shape(readable),[
+  ['sixteenth',true,false,0,0.25],['eighth',false,true,0.25,0.75],
+  ['sixteenth',true,false,1,0.25],['sixteenth',false,false,1.25,0.25],['eighth',true,false,1.5,0.5]
+]);
+assert.deepEqual(shape(core.simplifyMeasure(readable,sixteenths)),shape(readable));
+assert.equal(JSON.stringify(core.makePlaybackPlan({bars:1,measures:[circled]},90).sounds),JSON.stringify(core.makePlaybackPlan({bars:1,measures:[readable]},90).sounds));
+// Exercise the same rule for generated note/rest runs and every sixteenth offset.
+for(let offset=0;offset<quarter;offset+=quarter/4)for(const rest of [true,false])for(const dotted of [false,true]) {
+  const selected={eighth:{notes:true,rests:true,dotted},sixteenth:{notes:true,rests:true}};
+  const run=sequence([['quarter',rest],['eighth',true],['sixteenth']]).map(e=>({...e,time:e.time+offset}));
+  const result=core.simplifyMeasure(run,selected);
+  assert.ok(result.every(e=>e.time%quarter===0 || e.time%quarter+e.ticks<=quarter));
+  assert.deepEqual(Array.from(result.filter(e=>!e.rest),e=>e.time),Array.from(run.filter(e=>!e.rest),e=>e.time));
+  assert.equal(result.reduce((sum,e)=>sum+e.ticks,0),run.reduce((sum,e)=>sum+e.ticks,0));
+  assert.deepEqual(shape(core.simplifyMeasure(result,selected)),shape(result));
+}
+const rawCircled=sequence([['sixteenth',true],['eighth'],['eighth',true],['sixteenth'],['eighth',true]]);
+assert.deepEqual(shape(core.simplifyMeasure(rawCircled,sixteenths)),shape(readable),'The same grouping applies before an unreadable quarter could be created');
+
 const attacks=sequence([['sixteenth'],['sixteenth'],['sixteenth'],['sixteenth']]);
 assert.deepEqual(shape(core.simplifyMeasure(attacks,sixteenths)),shape(attacks),'Separate attacks never merge');
 const restThenNote=sequence([['sixteenth',true],['sixteenth']]);
