@@ -43,6 +43,7 @@ button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(-
 </div></fieldset>
 <div class="generation-settings">
 <div class="rest-control"><div class="rest-label"><label for="rest-chance">Количество пауз</label><output id="rest-value" for="rest-chance">30%</output></div><input id="rest-chance" type="range" min="0" max="100" step="5" value="30" aria-valuemax="99" aria-valuenow="30" aria-valuetext="30%" aria-describedby="rest-hint"><small id="rest-hint">Для всех выбранных пауз · шаг 5%, максимум 99%</small></div>
+<div class="rest-control"><div class="rest-label"><label for="etude-accent-chance">Количество акцентов</label><output id="etude-accent-value" for="etude-accent-chance">Выкл.</output></div><input id="etude-accent-chance" type="range" min="0" max="100" step="5" value="0" aria-valuetext="Выкл." aria-describedby="etude-accent-hint"><small id="etude-accent-hint">От выкл. до всех нот · шаг 5%</small></div>
 <div class="generate-area"><button class="primary" type="submit">Сгенерировать этюд ↗</button><small id="selection-hint">Галочки задают исходный ритм. При объединении могут появиться более длинные ноты и паузы.</small></div>
 </div>
 <p class="error" id="error" role="alert" hidden></p>
@@ -75,6 +76,7 @@ button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(-
 <p>Триоль, квинтоль и секстоль занимают одну четвертную долю и состоят из 3, 5 и 6 равных позиций. Каждая позиция может быть нотой или паузой — вся группа не обязана состоять из ударов. Полностью звучащая группа тоже может случайно получиться. Если выключить паузы для длительности, останутся только ноты.</p>
 <p>После генерации соседние паузы объединяются, а нота может поглотить следующую за ней паузу. Например, шестнадцатая нота и шестнадцатая пауза превращаются в восьмую. Для упрощения доступны половинные, четвертные, восьмые и шестнадцатые независимо от галочек. Два отдельных удара не объединяются; моменты звучания сохраняются. Границы долей важнее числа знаков: нота или пауза, начавшаяся внутри четвертной доли, не продлевается за её конец. При необходимости длинная нота сокращается, а остаток записывается паузой — новый удар не добавляется. Четвертные и половинные могут занимать целые доли, начинаясь на их границе. Объединение не пересекает тактовые черты и группы триолей, квинтолей и секстолей.</p>
 <p>Галочка «Ноты с точкой» разрешает восьмые ноты с точкой — при генерации и объединении. Они занимают три четверти доли. При разделении длинного интервала по долям восьмая с точкой также может появиться автоматически, чтобы завершить начатую долю. Восьмые и четвертные паузы с точкой используются автоматически при объединении, независимо от галочек; они длятся три четверти и полторы доли соответственно. У половинных и четвертных нот точек нет. Из-за случайного выбора и объединения знаков итоговая доля пауз может отличаться от значения ползунка.</p>
+<p>Ползунок «Количество акцентов» задаёт вероятность акцента для каждой ноты при следующей генерации. В минимальном положении акценты выключены; при 100% отмечаются все ноты. Акценты обозначаются знаком &gt; сверху и звучат громче остальных нот. Паузы акцентов не получают. Ползунок не меняет длительности и не зависит от количества пауз.</p>
 <p>«Слушать» проигрывает короткие барабанные удары в выбранном темпе. Паузы молчат; метроном отмечает четверти. «Стоп» завершает воспроизведение. «Скачать PDF» сохраняет этюд на страницах A4, а SVG — одним векторным файлом. На телефоне в строке один такт. На широком экране — четыре, если они помещаются, иначе два.</p>
 </details>
 <details class="help" id="accent-sequence" hidden><summary>Позиции акцентов цифрами</summary><p>Дефисы разделяют доли. Например, [13-2-2-23] — первая и третья позиции в первой доле, вторая во второй и третьей, вторая и третья в четвёртой.</p><pre id="accent-text" class="accent-text"></pre><button id="copy-accents" type="button">Скопировать позиции</button></details>
@@ -149,6 +151,14 @@ function makeEtude(bars, selection, restChance = 0.3, random = Math.random, simp
   });
   return {bars, measures};
 }
+function addEtudeAccents(etude,chance=0,random=Math.random) {
+  if(!Number.isFinite(chance)||chance<0||chance>1)throw new RangeError('Количество акцентов должно быть от 0 до 100%.');
+  // Decorate the finished rhythm so accents never affect durations, rests or onsets.
+  return {...etude,accentChance:chance,measures:etude.measures.map(measure=>measure.map(event=>({
+    ...event,accented:!event.rest && chance>0 && random()<chance
+  })))};
+}
+function usesAccentDynamics(etude) { return etude.mode==='accents'||etude.accentChance>0; }
 function makeAccentEtude(bars,beats,notes,maxAccents,random=Math.random) {
   if(!Number.isInteger(bars)||bars<1||bars>256)throw new RangeError('Количество тактов должно быть от 1 до 256.');
   if(!Number.isInteger(beats)||beats<1||beats>64)throw new RangeError('Долей в такте должно быть от 1 до 64.');
@@ -271,7 +281,7 @@ function drawMeasure(measure,width) {
   const connected=(i,j)=>j>=0&&j<measure.length&&!measure[i].rest&&!measure[j].rest&&beams[i]>0&&beams[j]>0&&(measure[i].beat??Math.floor(measure[i].time/QUARTER_TICKS))===(measure[j].beat??Math.floor(measure[j].time/QUARTER_TICKS))&&measure[i].tuplet===measure[j].tuplet;
   let out='';
   measure.forEach((event,i)=>{
-    out+=`<g data-event="${i}">${event.rest?restGlyph(xs[i],event.type,beams[i]):noteGlyph(xs[i],event,!connected(i,i-1)&&!connected(i,i+1))}${event.accented?`<path class="accent-mark" d="M${xs[i]-4} 8l9 4-9 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>`:""}${event.dotted?`<circle class="augmentation-dot" cx="${xs[i]+12}" cy="${event.rest?62:71}" r="1.9"/>`:""}</g>`;
+    out+=`<g data-event="${i}">${event.rest?restGlyph(xs[i],event.type,beams[i]):noteGlyph(xs[i],event,!connected(i,i-1)&&!connected(i,i+1))}${event.accented?`<path class="accent-mark" d="M${xs[i]-5} 6l11 5-11 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`:""}${event.dotted?`<circle class="augmentation-dot" cx="${xs[i]+12}" cy="${event.rest?62:71}" r="1.9"/>`:""}</g>`;
     const top=stemTop(event);
     if(connected(i,i+1))out+=`<path d="M${xs[i]+5} ${top}H${xs[i+1]+5}" fill="none" stroke="currentColor" stroke-width="3.7"/>`;
     if(!event.rest&&(connected(i,i-1)||connected(i,i+1)))for(let level=1;level<beams[i];level++){
@@ -366,7 +376,7 @@ function makePlaybackPlan(etude,bpm,metronome=false) {
   etude.measures.forEach((measure,bar)=>measure.forEach((event,index)=>{
     const at=(bar*beats*QUARTER_TICKS+event.time)*secondsPerTick;
     positions.push({at,end:at+event.ticks*secondsPerTick,bar,index});
-    if(!event.rest)sounds.push({at,kind:etude.mode==='accents'&&!event.accented?'softDrum':'drum'});
+    if(!event.rest)sounds.push({at,kind:usesAccentDynamics(etude)&&!event.accented?'softDrum':'drum'});
   }));
   if(metronome)for(let beat=0;beat<etude.bars*beats;beat++)sounds.push({at:beat*60/bpm,kind:beat%beats===0?'accent':'click'});
   sounds.sort((a,b)=>a.at-b.at);
@@ -383,7 +393,7 @@ function makeSoundBuffer(context,kind) {
     if(isDrum) {
       const noise=Math.random()*2-1;
       data[i]=attack*((noise-previous)*0.24*Math.exp(-t*60)+Math.sin(2*Math.PI*170*t)*0.4*Math.exp(-t*45));
-      if(kind==='softDrum')data[i]*=0.3;
+      if(kind==='softDrum')data[i]*=0.12;
       previous=noise;
     } else data[i]=attack*Math.sin(2*Math.PI*(kind==='accent'?1760:1320)*t)*0.32*Math.exp(-t*150);
   }
@@ -447,6 +457,11 @@ if(typeof document!=='undefined') {
     const value=restPercent()+'%';$('rest-value').value=value;
     $('rest-chance').setAttribute('aria-valuenow',restPercent());$('rest-chance').setAttribute('aria-valuetext',value);$('error').hidden=true;
   });
+  $('etude-accent-chance').addEventListener('input',()=>{
+    const value=Number($('etude-accent-chance').value);
+    const label=value===0?'Выкл.':value+'%';
+    $('etude-accent-value').value=label;$('etude-accent-chance').setAttribute('aria-valuetext',label);$('error').hidden=true;
+  });
   function applyTheme(theme) {
     document.documentElement.dataset.theme=theme;
     $('theme-toggle').textContent=theme==='dark'?'Светлая тема':'Тёмная тема';
@@ -498,7 +513,7 @@ if(typeof document!=='undefined') {
       if(audio.state!=='running')throw new Error('Не удалось включить звук. Попробуй нажать «Слушать» ещё раз.');
       player.setVolume(Number($('volume').value)/100);
       player.play(makePlaybackPlan(etude,Number($('tempo').value),$('metronome').checked));
-      $('player-status').textContent=mode==='accents'?'Играют все ноты. Акценты звучат громче.':'Играет этюд. Текущая нота или пауза подсвечена.';
+      $('player-status').textContent=usesAccentDynamics(etude)?'Играет упражнение. Акценты звучат громче.':'Играет этюд. Текущая нота или пауза подсвечена.';
     }catch(error){if(version===startVersion){stopPlayback();$('player-status').textContent=error.message||'Не удалось включить звук.';}}
   });
   $('stop').addEventListener('click',()=>{stopPlayback();$('player-status').textContent='Воспроизведение остановлено.';});
@@ -514,7 +529,7 @@ if(typeof document!=='undefined') {
     layout=layoutScore(etude,Math.max(200,width),columns,first,last);
     lines.replaceChildren();
     layout.rows.forEach(row=>{
-      const description=etude.measures.slice(row.start,row.end).map((m,i)=>`Такт ${row.start+i+1}: ${m.map(e=>mode==='accents'?`доля ${e.beat+1}, позиция ${e.position}, ${e.accented?'нота с акцентом':'нота без акцента'}`:`${DURATIONS.find(d=>d.id===e.type).name}${e.rest?' пауза':' нота'}${e.dotted?' с точкой':''}`).join(', ')}`).join('. ');
+      const description=etude.measures.slice(row.start,row.end).map((m,i)=>`Такт ${row.start+i+1}: ${m.map(e=>mode==='accents'?`доля ${e.beat+1}, позиция ${e.position}, ${e.accented?'нота с акцентом':'нота без акцента'}`:`${DURATIONS.find(d=>d.id===e.type).name}${e.rest?' пауза':' нота'}${e.dotted?' с точкой':''}${e.accented?', акцент':''}`).join(', ')}`).join('. ');
       const wrapper=document.createElement('div');wrapper.className='score-line'+(dense?' dense':'');wrapper.tabIndex=0;
       if(dense)wrapper.style.setProperty('--dense-width',Math.ceil(row.width*0.85)+'px');
       wrapper.setAttribute('aria-label',row.end-row.start===1?`Такт ${row.start+1}`:`Такты ${row.start+1}–${row.end}`);
@@ -533,6 +548,7 @@ if(typeof document!=='undefined') {
     $('score-title').textContent=exerciseTitle(etude);$('meter').textContent=exerciseMeter(etude);
     $('score-eyebrow').textContent=mode==='accents'?'Практика акцентов':'Практика чтения';
     $('score-footer').innerHTML=mode==='accents'?`<span>&gt; — акцент</span><span>Остальные ноты — тише</span><span>${etude.maxAccents===1?'Один акцент в доле':`Акцентов в доле: 1–${etude.maxAccents}`}</span>`:'<span>Один такт = четыре четверти</span><span>Паузы с точкой объединяются автоматически</span><span>Скобки с 3, 5 и 6 — группы на одну долю</span>';
+    if(mode==='etudes'&&etude.accentChance>0)$('score-footer').innerHTML+='<span>&gt; — акцент, играй громче</span>';
     $('etude-help').hidden=mode!=='etudes';$('accent-help').hidden=mode!=='accents';$('accent-sequence').hidden=mode!=='accents';
     if(mode==='accents'){
       const bars=accentText(etude),rows=[];for(let i=0;i<bars.length;i+=4)rows.push(bars.slice(i,i+4).join(' '));
@@ -540,14 +556,14 @@ if(typeof document!=='undefined') {
     }
     renderScore();playbackControls(false);
     let hits=0,rests=0,accents=0;for(const measure of etude.measures)for(const event of measure){event.rest?rests++:hits++;if(event.accented)accents++;}
-    $('status').textContent=mode==='accents'?`Акценты готовы. Нот: ${hits}, акцентов: ${accents}.`:`Этюд готов. Нот: ${hits}, пауз: ${rests}.`;
-    $('player-status').textContent=mode==='accents'?'Слушать: акценты громче, остальные ноты тише.':'Упражнение готово к прослушиванию.';
+    $('status').textContent=mode==='accents'?`Акценты готовы. Нот: ${hits}, акцентов: ${accents}.`:`Этюд готов. Нот: ${hits}, пауз: ${rests}${etude.accentChance>0?`, акцентов: ${accents}`:''}.`;
+    $('player-status').textContent=usesAccentDynamics(etude)?'Слушать: акценты громче, остальные ноты тише.':'Упражнение готово к прослушиванию.';
   }
   form.addEventListener('submit',event=>{
     event.preventDefault();if(!form.reportValidity())return;
     const selection=Object.fromEntries(GENERATION_DURATIONS.map(d=>[d.id,{notes:form.querySelector(`input[name="notes"][value="${d.id}"]`).checked,rests:form.querySelector(`input[name="rests"][value="${d.id}"]`).checked}]));
     selection.eighth.dotted=$('dotted-eighth').checked;
-    try{states.etudes={etude:makeEtude(Number($('bars').value),selection,restPercent()/100),page:0};}catch(error){$('error').textContent=error.message;$('error').hidden=false;return;}
+    try{states.etudes={etude:addEtudeAccents(makeEtude(Number($('bars').value),selection,restPercent()/100),Number($('etude-accent-chance').value)/100),page:0};}catch(error){$('error').textContent=error.message;$('error').hidden=false;return;}
     $('error').hidden=true;stopPlayback();showExercise();
   });
   function syncAccentLimit() {

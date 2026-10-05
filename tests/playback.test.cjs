@@ -61,7 +61,7 @@ for(const buffer of Object.values(test.player.buffers)){
   assert.ok(samples.every(x=>Math.abs(x)<=1),'Synthesized samples must not clip');
 }
 const rms=buffer=>Math.sqrt(buffer.getChannelData(0).reduce((sum,x)=>sum+x*x,0)/buffer.getChannelData(0).length);
-assert.ok(rms(test.player.buffers.softDrum)<rms(test.player.buffers.drum)*0.4,'Unaccented notes are quieter');
+assert.ok(rms(test.player.buffers.softDrum)<rms(test.player.buffers.drum)*0.16,'Unaccented notes are substantially quieter in both modes');
 test.player.setVolume(0);assert.equal(test.player.gain.gain.value,0);
 test.player.setVolume(2);assert.equal(test.player.gain.gain.value,1);
 test.player.play(plan);
