@@ -24,6 +24,21 @@ for(const [count,type,ticks] of [[2,'eighth',0.5],[4,'quarter',1],[8,'half',2]])
     assert.equal(JSON.stringify(core.makePlaybackPlan({bars:1,measures:[original]},90,true).sounds),JSON.stringify(core.makePlaybackPlan({bars:1,measures:[simplified]},90,true).sounds));
   }
 }
+
+for(const [items,type,ticks] of [
+  [[['sixteenth',true],['eighth',true]],'eighth',0.75],
+  [[['eighth',true],['sixteenth',true]],'eighth',0.75],
+  [[['quarter',true],['eighth',true]],'quarter',1.5],
+  [Array.from({length:6},()=>['sixteenth',true]),'quarter',1.5]
+]) {
+  const original=sequence([...items,['sixteenth']]);
+  for(const selection of [sixteenths,{eighth:{notes:true,rests:true,dotted:true}}]) {
+    const simplified=core.simplifyMeasure(original,selection);
+    assert.deepEqual(shape(simplified).slice(0,1),[[type,true,true,0,ticks]],'Dotted rests simplify independently of selected note types and dots');
+    assert.deepEqual(Array.from(simplified.filter(e=>!e.rest),e=>e.time),Array.from(original.filter(e=>!e.rest),e=>e.time));
+    assert.equal((core.drawMeasure(simplified,240).match(/class="augmentation-dot"/g)||[]).length,1);
+  }
+}
 const attacks=sequence([['sixteenth'],['sixteenth'],['sixteenth'],['sixteenth']]);
 assert.deepEqual(shape(core.simplifyMeasure(attacks,sixteenths)),shape(attacks),'Separate attacks never merge');
 const restThenNote=sequence([['sixteenth',true],['sixteenth']]);

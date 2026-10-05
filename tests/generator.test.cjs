@@ -46,7 +46,7 @@ for(let mask=1;mask<=combinationCount;mask++) for(const dotted of [false,true]) 
       let simplifiedTime=0;
       for(const event of simplified){
         assert.equal(event.time,simplifiedTime);simplifiedTime+=event.ticks;
-        assert.ok(!event.dotted || (dotted && event.type==='eighth'));
+        assert.ok(!event.dotted || (event.rest ? ['quarter','eighth'].includes(event.type) : dotted && event.type==='eighth'));
         assert.equal(event.ticks,defs.find(d=>d.id===event.type).ticks*(event.dotted?1.5:1));
       }
       assert.equal(simplifiedTime,quarter*4);

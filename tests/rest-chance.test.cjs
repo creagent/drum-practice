@@ -51,18 +51,22 @@ const restTime = chance => core.makeEtude(64, disjoint, chance, seeded(), false)
 assert.equal(restTime(0), 0);
 assert.ok(restTime(0.99) > restTime(0.01));
 
-// Regression: initial form settings used to disable all tuplet rests.
+// The initial palette contains only eighth and sixteenth notes and rests.
 const inputs=Array.from(html.matchAll(/<input\b[^>]*>/g),match=>match[0]);
 const defaults=Object.fromEntries(definitions.map(d=>[d.id,Object.fromEntries(['notes','rests'].map(kind=>[
   kind,inputs.some(input=>input.includes(`name="${kind}"`)&&input.includes(`value="${d.id}"`)&&/\bchecked\b/.test(input))
 ]))]));
 const defaultMeasures=core.makeEtude(64,defaults,0.3,seeded(),false).measures;
+for(const [type,options] of Object.entries(defaults))for(const enabled of Object.values(options))assert.equal(enabled,['eighth','sixteenth'].includes(type));
+assert.ok(defaultMeasures.flat().every(e=>['eighth','sixteenth'].includes(e.type)&&!e.dotted));
+// Enabling tuplets still produces mixed note/rest groups.
+const mixedMeasures=core.makeEtude(64,all,0.3,seeded(),false).measures;
 for(const type of ['triplet','quintuplet','sextuplet']) {
-  assert.ok(defaultMeasures.some(measure=>measure.some(event=>{
+  assert.ok(mixedMeasures.some(measure=>measure.some(event=>{
     if(event.type!==type)return false;
     const group=measure.filter(e=>e.tuplet===event.tuplet);
     return group.some(e=>e.rest)&&group.some(e=>!e.rest);
-  })),`${type} must produce mixed note/rest groups with the initial UI settings`);
+  })),`${type} must produce mixed note/rest groups when both notes and rests are enabled`);
 }
 
 console.log('PASS: shared rest probability 0–99%, all five families, tuplets, checkbox restrictions, disjoint selections, complete bars and preserved attacks.');
