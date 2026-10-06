@@ -64,7 +64,7 @@ const rms=buffer=>Math.sqrt(buffer.getChannelData(0).reduce((sum,x)=>sum+x*x,0)/
 assert.ok(rms(test.player.buffers.softDrum)<rms(test.player.buffers.drum)*0.16,'Unaccented notes are substantially quieter in both modes');
 test.player.setVolume(0);assert.equal(test.player.gain.gain.value,0);
 test.player.setVolume(2);assert.equal(test.player.gain.gain.value,1);
-test.player.play(plan);
+test.player.play({...plan,loop:false});
 assert.equal(test.sources.length,0,'Leading rest must be silent');
 for(let t=0;t<4.2;t+=.025){
   test.context.currentTime=t;test.player.schedule();
@@ -85,4 +85,46 @@ stopped.context.currentTime=2;stopped.player.schedule();assert.equal(stopped.sou
 const delayed=environment();delayed.player.play(tripletPlan);delayed.context.currentTime=1;delayed.player.schedule();
 assert.deepEqual(delayed.reasons,['interrupted']);assert.equal(delayed.sources.length,2,'Late hits must not burst');
 const suspended=environment();suspended.player.play(plan);suspended.context.state='suspended';suspended.player.schedule();assert.deepEqual(suspended.reasons,['interrupted']);
+// Repeats use one audio timeline, including leading/trailing rests and metronome.
+function advance(env,from,to,step=.025) {
+  for(let t=from;t<to;t+=step){
+    env.context.currentTime=t;env.player.schedule();
+    const frames=Array.from(env.frames.values());env.frames.clear();frames.forEach(fn=>fn());
+    for(const source of env.sources)if(source.onended&&t>=source.when+source.buffer.duration){const callback=source.onended;source.onended=null;callback();}
+  }
+}
+const loopingPlans=[
+  plan,
+  core.makePlaybackPlan(fixture,120,true),
+  core.makePlaybackPlan(core.makeAccentEtude(1,1,3,1,()=>0),240,true),
+  core.makePlaybackPlan(core.addEtudeAccents(core.makeEtude(1,{sixteenth:{notes:true}},0),0.5,()=>0.3),137)
+];
+for(const loopPlan of loopingPlans){
+  assert.equal(loopPlan.loop,true);
+  const env=environment();env.player.play(loopPlan);
+  const laps=10;
+  advance(env,0,.08+loopPlan.duration*laps-.01,.01);
+  assert.equal(env.player.playing,true);assert.deepEqual(env.reasons,[]);
+  const played=env.sources.filter(s=>s.when<.08+loopPlan.duration*laps-1e-8);
+  const expected=Array.from({length:laps},(_,cycle)=>loopPlan.sounds.map(sound=>({when:.08+cycle*loopPlan.duration+sound.at,kind:sound.kind}))).flat();
+  assert.equal(played.length,expected.length);
+  played.forEach((source,i)=>{
+    assert.ok(Math.abs(source.when-expected[i].when)<1e-10,'No added silence, duplicate attacks or drift at repeat boundaries');
+    assert.equal(source.buffer,env.player.buffers[expected[i].kind]);
+  });
+  for(let cycle=1;cycle<=laps;cycle++)assert.ok(env.positions.some(p=>p.cycle===cycle&&p.bar===0&&p.index===0),'Highlight returns to the first position on each lap');
+  const queued=Array.from(env.player.sources);
+  env.player.stop();
+  assert.ok(queued.every(s=>s.stopped&&s.disconnected),'Stop cancels even sources queued for the following lap');
+  assert.equal(env.player.sources.size,0);assert.equal(env.intervals.size,0);assert.equal(env.frames.size,0);
+  assert.deepEqual(env.reasons,['stopped']);
+}
+const silentLoop=environment();
+silentLoop.player.play(core.makePlaybackPlan(rests,240,false));
+advance(silentLoop,0,3.2);
+assert.equal(silentLoop.player.playing,true);assert.equal(silentLoop.sources.length,0);
+assert.ok(silentLoop.positions.some(p=>p.cycle===4));silentLoop.player.stop();
+const repeatDelayed=environment();repeatDelayed.player.play(loopingPlans[2]);
+repeatDelayed.context.currentTime=3;repeatDelayed.player.schedule();
+assert.deepEqual(repeatDelayed.reasons,['interrupted'],'A suspended loop does not burst through missed laps');
 console.log('PASS: note/rest timing, triplets/quintuplets/sextuplets, metronome, synthesis, scheduling, completion, cancellation and interruption.');
